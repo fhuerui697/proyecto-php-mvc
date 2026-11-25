@@ -2,6 +2,6 @@
 require __DIR__ . '/conexion.php';
 $total = $pdo->query('SELECT COUNT(*) FROM productos')->fetchColumn();
 ?>
-<h1>¡Despliegue automáticosdfsdsdf funcionando!</h1>
+<h1>¡Despliegue automáticosdfsdsdf funcionandoeeeeeeeeeee!</h1>
 <p>Conexión con MySQL correcta.</p>
 <p>Productos registrados: <?= $total ?></p>
