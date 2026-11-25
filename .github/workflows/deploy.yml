@@ -11,24 +11,25 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v6
+
+      - name: Instalar sshpass
+        run: sudo apt-get install -y sshpass
 
       - name: Desplegar
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/id_ed25519
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
 
+        run: |
           servidor="$SSH_USER@$SSH_HOST"
           ruta="/home/$SSH_USER/www/proyecto"
 
-          ssh "$servidor" "mkdir -p '$ruta'"
-          rsync -az --exclude='config.php' src/ "$servidor:$ruta/"
-          ssh "$servidor" "cd '$ruta' && php init.php"
+          sshpass -e ssh -o StrictHostKeyChecking=accept-new "$servidor" "mkdir -p '$ruta'"
+
+          sshpass -e rsync -az --exclude='config.php' src/ "$servidor:$ruta/"
+
+          sshpass -e ssh "$servidor" "cd '$ruta' && php init.php"
