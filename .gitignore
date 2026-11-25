@@ -1,0 +1,5 @@
+/config.php
+/config.json
+/.env
+/github_alwaysdata*
+*.pem
