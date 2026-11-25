@@ -1,18 +1,19 @@
 name: Desplegar en Alwaysdata
+
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   contents: read
-concurrency: alwaysdata-proyecto
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
+
       - name: Desplegar
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
@@ -20,11 +21,14 @@ jobs:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
-          install -d -m 700 ~/.ssh
+          mkdir -p ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
           printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519
+
           servidor="$SSH_USER@$SSH_HOST"
-          ruta="/home/$SSH_USER/proyecto"
-          rsync -az -e 'ssh -o BatchMode=yes' public conexion.php init.php database.sql "$servidor:$ruta/"
-          ssh -o BatchMode=yes "$servidor" "cd '$ruta' && php init.php"
+          ruta="/home/$SSH_USER/www/proyecto"
+
+          ssh "$servidor" "mkdir -p '$ruta'"
+          rsync -az --exclude='config.php' src/ "$servidor:$ruta/"
+          ssh "$servidor" "cd '$ruta' && php init.php"
